@@ -1,0 +1,1 @@
+{"version":3,"sources":["teste-daniel.css"],"names":[],"mappings":"AAAA;EACE,6DAA4D;EAC7D","file":"teste-daniel.css","sourcesContent":["body {\n  background-image: url(http://semantic-ui.com/images/bg.jpg);\n}\n"],"sourceRoot":"/source/"}
