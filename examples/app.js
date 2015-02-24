@@ -1,9 +1,11 @@
 (function() {
   var init, ready;
 
-  angular.module('app', ['teste-daniel', 'ngResource']).controller('ctrl', [
-    '$scope', '$resource', function($scope, $resource) {
-      return $scope.teste = 'teste';
+  angular.module('app', ['teste-daniel']).controller('ctrl', [
+    '$scope', 'todoService', function($scope, todoService) {
+      $scope.teste = 'teste';
+      $scope.ts = todoService;
+      return console.log($scope.ts);
     }
   ]);
 
