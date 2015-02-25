@@ -14,7 +14,25 @@
 
 <div class="container" style="margin-top: 24px">
 
-{{teste}}
+
+    <div class="list-group">
+        <div class="list-group-item">
+            <select ng-model="currentTodo.user" class="form-control pull-right" style="max-width: 15%;">
+                <option value="user1" selected="selected">User1</option>
+                <option value="user2">User2</option>
+            </select>
+            <input class="form-control" style="max-width: 80%;" ng-model="currentTodo.title" ng-keypress="insert($event)" placeholder="O que você precisa fazer?" autofocus="true">
+        </div>
+        <div class="list-group-item" ng-repeat="todo in ts.todos">
+            <div ng-hide="editTodo == todo.doc">
+                <i class="fa fa-check fa-2x {{todo.doc.complete ? 'text-success' : 'text-danger'}}" ng-click="completeTodo(todo.doc)"></i>
+                <i class="pull-right fa fa-2x fa-times text-danger" ng-click="removeTodo(todo.doc)"></i>
+                <label ng-click="editTodo = todo.doc">{{todo.doc.title}}</label>
+                <abbr>{{todo.doc.user}}</abbr>
+            </div>
+            <input class="form-control" ng-model="editTodo.title" ng-keypress="update($event, editTodo)" ng-show="editTodo == todo.doc" placeholder="O que você precisa fazer?" autofocus="true">
+        </div>
+    </div>
 
 
 </div>
