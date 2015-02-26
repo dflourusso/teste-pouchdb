@@ -2,28 +2,41 @@
   var init, ready;
 
   angular.module('app', ['teste-daniel']).controller('ctrl', [
-    '$scope', 'todoService', 'TodoModel', function($scope, todoService, TodoModel) {
-      $scope.user = 'user1';
-      $scope.ts = todoService;
-      $scope.currentTodo = new TodoModel();
-      $scope.removeTodo = function(todo) {
-        return todoService.removeTodo(todo);
+    '$scope', 'pouchDB', 'TodoModel', function($scope, pouchDB, TodoModel) {
+      var db, onChange, options;
+      $scope.remote = "http://192.168.25.8:5984/todos";
+      db = pouchDB($scope.remote);
+      db.replicate.from($scope.remote);
+      $scope.docs = [];
+      $scope.add = function() {
+        return db.post({
+          date: new Date().toJSON()
+        });
       };
-      $scope.completeTodo = function(todo) {
-        todo.complete = !todo.complete;
-        return todoService.update(todo);
+      $scope.remove = function(doc) {
+        return db.get(doc._id).then((function(_this) {
+          return function(_doc) {
+            return db.remove(_doc);
+          };
+        })(this))["catch"]((function(_this) {
+          return function(err) {
+            return console.log('Erro ao remover');
+          };
+        })(this));
       };
-      $scope.insert = function($event) {
-        if ($event.keyCode === 13) {
-          todoService.insert($scope.currentTodo);
-          return $scope.currentTodo = new TodoModel();
-        }
+      onChange = (function(_this) {
+        return function(change) {
+          console.log(change);
+          return $scope.docs.push(change);
+        };
+      })(this);
+      options = {
+        include_docs: true,
+        live: true,
+        onChange: onChange
       };
-      return $scope.update = function($event, editTodo) {
-        if ($event.keyCode === 13) {
-          return todoService.update(editTodo);
-        }
-      };
+      console.log(db.changes(options));
+      return db.changes(options).then(null, null, onChange);
     }
   ]);
 

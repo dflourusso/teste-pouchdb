@@ -1,25 +1,46 @@
 angular.module('app', ['teste-daniel'])
 
-.controller 'ctrl', ['$scope', 'todoService', 'TodoModel', ($scope, todoService, TodoModel)->
-  $scope.user = 'user1'
-  $scope.ts = todoService
-  $scope.currentTodo = new TodoModel()
+.controller 'ctrl', ['$scope', 'pouchDB', 'TodoModel', ($scope, pouchDB, TodoModel)->
+  $scope.remote = "http://192.168.25.8:5984/todos"
+  db = pouchDB $scope.remote
 
-  $scope.removeTodo = (todo)->
-    todoService.removeTodo(todo)
+#  updateStatus = (response)->
+#    $scope.status = JSON.stringify(response)
+#
+#  $scope.replicate = ->
+#    db.post date: new Date().toJSON()
+#    db.replicate.to($scope.remote)
+#    .then(null, null, updateStatus)
+#    .then(updateStatus)
+#    .catch(updateStatus)
 
-  $scope.completeTodo = (todo)->
-    todo.complete = !todo.complete
-    todoService.update todo
 
-  $scope.insert = ($event)->
-    if $event.keyCode == 13
-      todoService.insert $scope.currentTodo
-      $scope.currentTodo = new TodoModel()
+  db.replicate.from($scope.remote)
 
-  $scope.update = ($event, editTodo)->
-    if $event.keyCode == 13
-      todoService.update editTodo
+  $scope.docs = []
+
+  $scope.add = ->
+    db.post date: new Date().toJSON()
+
+  $scope.remove = (doc)->
+    db.get(doc._id).then((_doc)=>
+      return db.remove(_doc);
+    ).catch (err)=>
+      console.log 'Erro ao remover'
+
+
+  onChange = (change)=>
+    console.log change
+    $scope.docs.push change
+
+  options =
+    include_docs: true,
+    live: true,
+    onChange: onChange
+
+  console.log db.changes(options)
+  db.changes(options).then(null, null, onChange)
+
 
 ]
 ready = if navigator.userAgent.indexOf('(cordova;') > -1 then 'deviceready' else 'DOMContentLoaded'
