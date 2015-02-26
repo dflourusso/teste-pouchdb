@@ -2,12 +2,21 @@
   var init, ready;
 
   angular.module('app', ['teste-daniel']).controller('ctrl', [
-    '$scope', 'pouchDB', 'TodoModel', function($scope, pouchDB, TodoModel) {
-      var db, onChange, options;
-      $scope.remote = "http://192.168.25.8:5984/todos";
-      db = pouchDB($scope.remote);
-      db.replicate.from($scope.remote);
+    '$scope', '$window', 'pouchDB', 'TodoModel', function($scope, $window, pouchDB, TodoModel) {
+      var db, local, onChange, options, remote;
+      remote = "http://192.168.25.8:5984/todos";
+      local = 'todos';
       $scope.docs = [];
+      db = pouchDB(local);
+      $scope.sync = function() {
+        return db.sync(remote, {
+          live: true
+        });
+      };
+      $scope.sync();
+      window.addEventListener('online', function() {
+        return $scope.sync();
+      });
       $scope.add = function() {
         return db.post({
           date: new Date().toJSON()
@@ -25,9 +34,14 @@
         })(this));
       };
       onChange = (function(_this) {
-        return function(change) {
-          console.log(change);
-          return $scope.docs.push(change);
+        return function() {
+          var options;
+          options = {
+            include_docs: true
+          };
+          return db.allDocs(options).then(function(data) {
+            return $scope.docs = data.rows;
+          });
         };
       })(this);
       options = {
