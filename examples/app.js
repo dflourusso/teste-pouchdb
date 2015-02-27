@@ -1,7 +1,34 @@
 (function() {
   var init, ready;
 
-  angular.module('app', ['teste-daniel', 'file-model']).controller('ctrl', [
+  angular.module('app', ['teste-daniel', 'file-model']).filter('url2image', [
+    '$sce', function($sce) {
+      return function(val) {
+        if (!val) {
+          return val;
+        }
+        return val;
+      };
+    }
+  ]).directive('imgPouch', function($window) {
+    return {
+      restrict: 'A',
+      scope: {
+        getAttachment: '=',
+        docId: '=',
+        attachmentId: '='
+      },
+      link: function(scope, element, attrs) {
+        return scope.getAttachment(scope.docId, scope.attachmentId).then((function(_this) {
+          return function(file) {
+            var url;
+            url = $window.URL.createObjectURL(file);
+            return element.attr('src', url);
+          };
+        })(this));
+      }
+    };
+  }).controller('ctrl', [
     '$q', '$scope', '$window', 'pouchDB', function($q, $scope, $window, pouchDB) {
       var db, local, onChange, options, remote;
       remote = "http://192.168.25.8:5984/todos";
@@ -9,6 +36,7 @@
       $scope.docs = [];
       $scope.attachment = null;
       db = pouchDB(local);
+      $scope.getAttachment = db.getAttachment;
       $scope.sync = function() {
         return db.sync(remote, {
           live: true
@@ -47,6 +75,11 @@
         }
         attachment_id = new Date().toJSON();
         return db.putAttachment(doc._id, attachment_id, doc._rev, attachment, attachment.type, function(err, res) {
+          return console.log(err, res);
+        });
+      };
+      $scope.removeAttach = function(doc_id, attachment_id, _rev) {
+        return db.removeAttachment(doc_id, attachment_id, _rev, function(err, res) {
           return console.log(err, res);
         });
       };

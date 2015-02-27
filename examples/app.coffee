@@ -1,4 +1,20 @@
 angular.module('app', ['teste-daniel', 'file-model'])
+.filter 'url2image', ['$sce', ($sce)->
+  (val)->
+    return val unless val
+    val
+#    val.replace 'blob:', ''
+]
+.directive 'imgPouch', ($window)->
+  restrict: 'A'
+  scope:
+    getAttachment: '='
+    docId: '='
+    attachmentId: '='
+  link: (scope, element, attrs)->
+    scope.getAttachment(scope.docId, scope.attachmentId).then (file)=>
+      url = $window.URL.createObjectURL file
+      element.attr 'src', url
 
 .controller 'ctrl', ['$q', '$scope', '$window', 'pouchDB', ($q, $scope, $window, pouchDB)->
   remote = "http://192.168.25.8:5984/todos"
@@ -7,6 +23,7 @@ angular.module('app', ['teste-daniel', 'file-model'])
   $scope.attachment = null
 
   db = pouchDB local
+  $scope.getAttachment = db.getAttachment
   $scope.sync = ->
     db.sync remote, live: true
   $scope.sync()
@@ -19,6 +36,11 @@ angular.module('app', ['teste-daniel', 'file-model'])
       include_docs: true
     db.allDocs(options).then (data)=>
       $scope.docs = data.rows
+#      for doc in $scope.docs
+#        for k of doc.doc._attachments
+#          db.getAttachment(doc.doc._id, k).then (file)=>
+#            url = $window.URL.createObjectURL file
+#            doc.doc._attachments[k].url = url
 
   options =
     include_docs: true,
@@ -26,6 +48,7 @@ angular.module('app', ['teste-daniel', 'file-model'])
     onChange: onChange
 
   db.changes(options).then(null, null, onChange)
+
 
 
 
@@ -38,6 +61,9 @@ angular.module('app', ['teste-daniel', 'file-model'])
     db.putAttachment doc._id, attachment_id, doc._rev, attachment, attachment.type, (err, res)->
       console.log err, res
 
+  $scope.removeAttach = (doc_id, attachment_id, _rev)->
+    db.removeAttachment doc_id, attachment_id, _rev, (err, res)->
+      console.log err, res
 
 
   $scope.remove = (doc)->

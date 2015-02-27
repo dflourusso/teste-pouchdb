@@ -19,8 +19,13 @@
     <ul>
         <li ng-repeat="doc in docs">
             <i class="fa fa-times text-danger" ng-click="remove(doc.doc)"></i>
-            {{doc.doc}}
-            
+            {{doc.doc._id}}
+            <ul>
+                <li ng-repeat="(k, v) in doc.doc._attachments">
+                    <img get-attachment="getAttachment" img-pouch attachment-id="k" doc-id="doc.doc._id">
+                    <i class="fa fa-times text-danger" ng-click="removeAttach(doc.doc._id, k, doc.doc._rev)"></i>
+                </li>
+            </ul>
             <input type="file" file-model='attachment'>
             <i class="fa fa-check text-success" ng-click="addAttach(attachment, doc.doc)"></i>
             <hr>
