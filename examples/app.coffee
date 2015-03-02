@@ -36,11 +36,6 @@ angular.module('app', ['teste-daniel', 'file-model'])
       include_docs: true
     db.allDocs(options).then (data)=>
       $scope.docs = data.rows
-#      for doc in $scope.docs
-#        for k of doc.doc._attachments
-#          db.getAttachment(doc.doc._id, k).then (file)=>
-#            url = $window.URL.createObjectURL file
-#            doc.doc._attachments[k].url = url
 
   options =
     include_docs: true,
@@ -52,8 +47,21 @@ angular.module('app', ['teste-daniel', 'file-model'])
 
 
 
+
+
   $scope.add = ->
     db.post date: new Date().toJSON()
+
+  $scope.update = (doc)->
+    db.get(doc._id).then((_doc)=>
+      console.log 'update', _doc
+      db.put
+        _id: _doc._id
+        _rev: _doc._rev
+        date: new Date().toJSON()
+    ).catch (err)=>
+      console.log 'Erro ao remover', err
+
 
   $scope.addAttach = (attachment, doc)->
     return unless attachment

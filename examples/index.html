@@ -19,7 +19,7 @@
     <ul>
         <li ng-repeat="doc in docs">
             <i class="fa fa-times text-danger" ng-click="remove(doc.doc)"></i>
-            {{doc.doc._id}}
+            <div ng-click="update(doc.doc)">{{doc.doc._id}} - {{doc.doc.date}}</div>
             <ul>
                 <li ng-repeat="(k, v) in doc.doc._attachments">
                     <img get-attachment="getAttachment" img-pouch attachment-id="k" doc-id="doc.doc._id">

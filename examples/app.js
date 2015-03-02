@@ -68,6 +68,22 @@
           date: new Date().toJSON()
         });
       };
+      $scope.update = function(doc) {
+        return db.get(doc._id).then((function(_this) {
+          return function(_doc) {
+            console.log('update', _doc);
+            return db.put({
+              _id: _doc._id,
+              _rev: _doc._rev,
+              date: new Date().toJSON()
+            });
+          };
+        })(this))["catch"]((function(_this) {
+          return function(err) {
+            return console.log('Erro ao remover', err);
+          };
+        })(this));
+      };
       $scope.addAttach = function(attachment, doc) {
         var attachment_id;
         if (!attachment) {
